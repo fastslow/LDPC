@@ -1,0 +1,42 @@
+n = 8190;   % 码长
+J = n / 2;  % 行数 根据实际设定
+
+gamma = 3;  % 列重
+rho = 6;    % 行重
+
+location = 1:J;
+
+i = 1;
+while i <= n
+    h_i = zeros(J,1);
+    one_loc = randperm(length(location),gamma);    % 1的随机位置
+    h_i(location(one_loc)) = 1;   % 候选列
+    
+    if i == 1
+        H_i_1 = h_i;    % 首列直接添加
+    else
+        % 不超过两个同一分量同时为1
+        judgematrix = H_i_1 & h_i;  % 判断矩阵
+        judgematrix = sum(judgematrix);
+        flag = sum(judgematrix > 1);
+        if flag ~= 0    % 超过两处同1 拒绝使用
+            continue
+        end
+        
+        % 满足行重要求
+        judgematrix = sum(H_i_1,2) + h_i;
+        flag = sum(judgematrix > rho);
+        if flag ~= 0    % 超过行重 拒绝使用
+            delnum = find(judgematrix == rho + 1);
+            dellog = sum(location == delnum,1);
+            delpos = find(dellog .* location > 0);
+            
+            location(delpos) = [];
+            continue
+        end
+        
+        H_i = [H_i_1,h_i];
+        H_i_1 = H_i;
+    end
+    i = i + 1;
+end
